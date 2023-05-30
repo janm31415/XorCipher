@@ -14,6 +14,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,8 +29,8 @@ extern "C" {
 #endif
 
 XORCIPHER_DEF char* xorcipher_base64_encode(const unsigned char* bytes, unsigned long length);
-XORCIPHER_DEF unsigned char* xorcipher_base64_decode(unsigned long* decoded_size, const char* encoded_string, unsigned long encoded_string_length);
-
+XORCIPHER_DEF unsigned char* xorcipher_base64_decode(unsigned long* decoded_size, const char* encoded_string);
+XORCIPHER_DEF void xorcipher_xor(unsigned char* message, unsigned long message_length, const char* base64_password);
 
 #ifdef __cplusplus
 }
@@ -103,8 +104,9 @@ static int is_base64(const char ch)
   return -1;
 }
 
-XORCIPHER_DEF unsigned char* xorcipher_base64_decode(unsigned long* decoded_size, const char* encoded_string, unsigned long encoded_string_length)
+XORCIPHER_DEF unsigned char* xorcipher_base64_decode(unsigned long* decoded_size, const char* encoded_string)
 {
+  unsigned long encoded_string_length = strlen(encoded_string);
   unsigned char char_array_4[4];
   unsigned char char_array_3[3];
   unsigned char* result = XORCIPHER_MALLOC(encoded_string_length * 3 / 4);
@@ -126,13 +128,15 @@ XORCIPHER_DEF unsigned char* xorcipher_base64_decode(unsigned long* decoded_size
     }
   }
   
+  if (decoded_size != NULL)
+      *decoded_size = i + j;
+  
   if (i) {
     for (int q = i; q < 4; ++q)
       char_array_4[q] = 0;
-    
     if (decoded_size != NULL)
       *decoded_size = i + j - 1;
-    
+      
     result[j++] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
     result[j++] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
     result[j++] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
@@ -140,6 +144,17 @@ XORCIPHER_DEF unsigned char* xorcipher_base64_decode(unsigned long* decoded_size
   }
   
   return result;
+}
+
+XORCIPHER_DEF void xorcipher_xor(unsigned char* message, unsigned long message_length, const char* base64_password)
+{
+  unsigned long decoded_size;
+  unsigned char* pw = xorcipher_base64_decode(&decoded_size, base64_password);
+  for (unsigned long i = 0; i < message_length; ++i)
+    {
+    message[i] ^= pw[i % decoded_size];
+    }
+  XORCIPHER_FREE(pw);
 }
 
 #endif // XORCIPHER_IMPLEMENTATION
