@@ -76,6 +76,7 @@ void test_xor_cipher_message(const char* message, const char* base64_password)
 void test_xor()
 {
   test_xor_cipher_message("Hello world!!!\n", "ADRASDjasdflkwef0681");
+  test_xor_cipher_message("Hello world!!!\n\r..!!!@!#$%^%^&*())__", "ADRAsdflkjqelkvcjflkjaweff////*****ASDFASDF31310684035840SDjasdflkwef0681");
 }
 
 int main(int argc, const char* argv[])
