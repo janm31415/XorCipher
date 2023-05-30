@@ -108,7 +108,7 @@ XORCIPHER_DEF unsigned char* xorcipher_base64_decode(unsigned long* decoded_size
   unsigned long encoded_string_length = strlen(encoded_string);
   unsigned char char_array_4[4];
   unsigned char char_array_3[3];
-  unsigned char* result = XORCIPHER_MALLOC(encoded_string_length * 3 / 4);
+  unsigned char* result = (unsigned char*)XORCIPHER_MALLOC(encoded_string_length * 3 / 4);
   int i = 0;
   unsigned long j = 0;
   int in_ = 0;
@@ -149,10 +149,10 @@ XORCIPHER_DEF void xorcipher_xor(unsigned char* message, unsigned long message_l
 {
   unsigned long decoded_size;
   unsigned char* pw = xorcipher_base64_decode(&decoded_size, base64_password);
-  for (unsigned long i = 0; i < message_length; ++i)
-    {
-    message[i] ^= pw[i % decoded_size];
-    }
+  //for (unsigned long i = 0; i < message_length; ++i)
+  //  {
+  //  message[i] ^= pw[i % decoded_size];
+  //  }
   XORCIPHER_FREE(pw);
 }
 
