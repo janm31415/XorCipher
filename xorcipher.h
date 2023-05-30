@@ -79,17 +79,16 @@ XORCIPHER_DEF char* xorcipher_base64_encode(const unsigned char* bytes, unsigned
   
   if(count > 0)
   {
-    result[j++] = base64_chars[(buffer[0] & 0xfc) >> 2];
-    if(count == 1) {
-      result[j++] = base64_chars[(buffer[0] & 0x03) << 4];
-      result[j++] = '=';
-    } else {
-      result[j++] = base64_chars[((buffer[0] & 0x03) << 4) + ((buffer[1] & 0xc0) >> 4)];
-      result[j++] = base64_chars[(buffer[1] & 0x0f) << 2];
-    }
-    result[j++] = '=';
+    for (int k = count; k < 3; ++k)
+      buffer[k] = 0;
+    result[j] = base64_chars[(buffer[0] & 0xfc) >> 2];
+    result[j+1] = base64_chars[((buffer[0] & 0x03) << 4) + ((buffer[1] & 0xf0) >> 4)];
+    result[j+2] = base64_chars[((buffer[1] & 0x0f) << 2) + ((buffer[2] & 0xc0) >> 6)];
+    result[j+3] = base64_chars[buffer[2] & 0x3f];
+    j += count;
+    while (j++ < 3)
+      result[j] = '=';
   }
-  
   result[j] = '\0';
   return result;
 }
