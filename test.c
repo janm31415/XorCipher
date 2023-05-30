@@ -3,6 +3,7 @@
 #include "xorcipher.h"
 
 #include <time.h>
+#include <stdint.h>
 
 void test_base64_1(unsigned char length)
 {
@@ -13,7 +14,7 @@ void test_base64_1(unsigned char length)
   unsigned long le;
   unsigned char* orig = xorcipher_base64_decode(&le, b64);
   TEST_EQ_INT(length, le);
-  for (int i = 0; i < le; ++i)
+  for (unsigned long i = 0; i < le; ++i)
   {
     TEST_EQ_INT(i, orig[i]);
   }
@@ -37,7 +38,7 @@ void test_base64_2(unsigned char length)
   unsigned char* orig = xorcipher_base64_decode(&le, b64);
   TEST_EQ_INT(length, le);
   seed = 7651351;
-  for (int i = 0; i < le; ++i)
+  for (unsigned long i = 0; i < le; ++i)
   {
     TEST_EQ_INT(seed&255, orig[i]);
     seed ^= (seed << 13);
@@ -52,18 +53,23 @@ void test_base64_encoding()
 {
   for (int i = 1; i < 256; ++i)
   {
-    test_base64_1(i);
-    test_base64_2(i);
+    test_base64_1((unsigned char)i);
+    test_base64_2((unsigned char)i);
   }
 }
 
 void test_xor_cipher_message(const char* message, const char* base64_password)
 {
-  unsigned long le = strlen(message);
+  unsigned long le = (unsigned long)strlen(message);
   unsigned char* m = (unsigned char*)malloc(le);
   for (unsigned long i = 0; i < le; ++i)
     m[i] = message[i];
   xorcipher_xor(m, le, base64_password);
+  xorcipher_xor(m, le, base64_password);
+  for (unsigned long i = 0; i < le; ++i)
+    {
+    TEST_EQ_INT(m[i], message[i]);
+    }
   free(m);
 }
 
